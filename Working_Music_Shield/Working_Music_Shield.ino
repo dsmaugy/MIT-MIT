@@ -1,27 +1,29 @@
 #include <SoftwareSerial.h>
 
 #define DRUM1 0 //Analog sensor 1
-int drumSens = 335;
+int drumSens = 530;
 
 SoftwareSerial mySerial(2, 3); // RX, TX
 byte resetMIDI = 4; //Tied to VS1053 Reset line
 byte ledPin = 13; //MIDI traffic inidicator
-
+int valA = 0;
 #define piezoPin 1
-
 void setup() {
+
   Serial.begin(57600);
 
   //Setup soft serial for MIDI control
   mySerial.begin(31250);
 
-  //Reset the VS1053
+  //Reset the VS1053 playCNote(74, 100);
   pinMode(resetMIDI, OUTPUT);
   digitalWrite(resetMIDI, LOW);
   delay(100);
   digitalWrite(resetMIDI, HIGH);
   delay(100);
   talkMIDI(0xB0, 0x07, 127); //0xB0 is channel message, set channel volume to near max (127)
+  //talkMIDI(0xC0. 5, 0x00);
+  //noteOn(0, 60, 127);
 }
 
 void loop() {
@@ -31,15 +33,9 @@ void loop() {
     playCNote(5, 120, 500);
     } **/
   //Serial.println(piezoValue);
-  
   readInputs();
-  while(valA < drumSens) {
-    readInputs();
-    playCNote(5, 120, 500);
-    
-    } 
-}
-
+  playCNote(3);
+} 
 
 void playANote(byte instrument, byte noteVelocity, int duration) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
@@ -55,11 +51,22 @@ void playBNote(byte instrument, byte noteVelocity, int duration) {
   noteOff(0, 59, noteVelocity);
 }
 
-void playCNote(byte instrument, byte noteVelocity, int duration) {
+void playCNote(byte instrument) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
-  noteOn(0, 60, noteVelocity);
-  delay(duration);
-  noteOff(0, 60, noteVelocity);
+  //talkMIDI(0xB0, 12, )
+  //setVolume();
+
+  //Volume setting stuff
+  int volRange = (drumSens - valA);
+  int desiredVolume = map(volRange, 0, 500, 0, 127);
+  int realDesiredVolume = constrain(desiredVolume, 0, 127);
+  
+  if(valA < drumSens) {
+    readInputs();
+    noteOn(0, 60, realDesiredVolume);
+  } else {
+    noteOff(0, 60, realDesiredVolume);
+  }
 }
 
 void playDNote(byte instrument, byte noteVelocity, int duration) {
@@ -91,10 +98,10 @@ void playGNote(byte instrument, byte noteVelocity, int duration) {
 }
 
 
-void maryLamb() {
+/** void maryLamb() {
   playENote(5, 120, 500);
   playDNote(5, 120, 500);
-  playCNote(5, 120, 500);
+  playCNote(5, 120);
   playDNote(5, 120, 500);
   playENote(5, 120, 500);
   playENote(5, 120, 500);
@@ -109,7 +116,7 @@ void maryLamb() {
 
   playENote(5, 120, 500);
   playDNote(5, 120, 500);
-  playCNote(5, 120, 500);
+  playCNote(5, 120);
   playDNote(5, 120, 500);
   playENote(5, 120, 500);
   playENote(5, 120, 500);
@@ -120,9 +127,9 @@ void maryLamb() {
   playDNote(5, 120, 500);
   playENote(5, 120, 500);
   playDNote(5, 120, 500);
-  playCNote(5, 120, 500);
+  playCNote(5, 120);
   
-}
+} **/
 
 void noteOn(byte channel, byte note, byte attack_velocity) {
   talkMIDI( (0x90 | channel), note, attack_velocity);
@@ -149,5 +156,19 @@ void talkMIDI(byte cmd, byte data1, byte data2) {
 
 void readInputs() {
   valA = analogRead(DRUM1);  // Read the voltage
-  Serial.println(valA, DEC); // Print the voltage to the terminal
+  Serial.println(valA, DEC); // Print the voltseSerial.println(valAHex);tage to the terminal
 }
+
+void setVolume() {
+  int desiredVolume = 0;
+  int volRange = (drumSens - valA);
+  int volMult = (volRange * 50);
+  desiredVolume = map(volMult, 0, drumSens, 0, 16383);
+  //desiredVolume = constrain(desiredVolume, 0, 16383); 
+  //Serial.println("Vol: " + desiredVolume);
+  talkMIDI(0xB0, 7, 100);
+}
+
+
+
+
