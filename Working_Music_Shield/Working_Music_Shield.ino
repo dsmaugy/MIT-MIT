@@ -1,5 +1,8 @@
 #include <SoftwareSerial.h>
 
+#define DRUM1 0 //Analog sensor 1
+int drumSens = 335;
+
 SoftwareSerial mySerial(2, 3); // RX, TX
 byte resetMIDI = 4; //Tied to VS1053 Reset line
 byte ledPin = 13; //MIDI traffic inidicator
@@ -27,10 +30,14 @@ void loop() {
   if (piezoValue > 1000) {
     playCNote(5, 120, 500);
     } **/
-  //erial.println(piezoValue);
-
- 
+  //Serial.println(piezoValue);
   
+  readInputs();
+  while(valA < drumSens) {
+    readInputs();
+    playCNote(5, 120, 500);
+    
+    } 
 }
 
 
@@ -138,4 +145,9 @@ void talkMIDI(byte cmd, byte data1, byte data2) {
     mySerial.write(data2);
 
   digitalWrite(ledPin, LOW);
+}
+
+void readInputs() {
+  valA = analogRead(DRUM1);  // Read the voltage
+  Serial.println(valA, DEC); // Print the voltage to the terminal
 }
