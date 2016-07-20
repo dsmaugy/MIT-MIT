@@ -1,14 +1,17 @@
+//Library inclusions
 #include <Adafruit_NeoPixel.h>
 #include <XBee.h>
 #include <SoftwareSerial.h>
-#define DRUM1 0 //Analog sensor 1
-int drumSens = 600;
 #include <Adafruit_NeoPixel.h>
+
+//Neopixel thing
 #ifdef __AVR__
-  #include <avr/power.h>
+#include <avr/power.h>
 #endif
 
+//Constants
 #define PIN 8
+#define DRUM1 0 //Analog sensor 1
 
 // Parameter 1 = number of pixels in strip
 // Parameter 2 = Arduino pin number (most are valid)
@@ -18,113 +21,129 @@ int drumSens = 600;
 //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 //   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, PIN, NEO_GRB + NEO_KHZ800);
-
 // IMPORTANT: To reduce NeoPixel burnout risk, add 1000 uF capacitor across
 // pixel power leads, add 300 - 500 Ohm resistor on first pixel's data input
 // and minimize distance between Arduino and first pixel.  Avoid connecting
 // on a live circuit...if you must, connect GND first.
- 
-SoftwareSerial mySerial(2, 3); // RX, TX
-SoftwareSerial xbeeSoftSerial(A0, A1);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, PIN, NEO_GRB + NEO_KHZ800);
 
+
+
+
+
+/***************************\
+*                           *
+*      Xbee Variables       *
+*                           *
+*                           *
+\***************************/
+//Debug lights
+int statusLed = 11; 
+int errorLed = 12;
+int dataLed = 10;
+int dataCorrectLed = 13;
+
+//Incoming data vars
+uint8_t option = 0;
+uint8_t data = 0; 
+
+//Object initializations
 XBee xbee = XBee();
 XBeeResponse response = XBeeResponse();
 Rx16Response rx16 = Rx16Response();
 Rx64Response rx64 = Rx64Response();
 
-//Xbee vars
-int statusLed = 11;
-int errorLed = 12;
-int dataLed = 10;
-int dataCorrectLed = 13;
+//Serial initialization
+SoftwareSerial xbeeSoftSerial(A0, A1); // RX, TX
 
-//MIDI vars
+
+
+
+/***************************\
+*                           *
+*      MIDI Variables       *
+*                           *
+*                           *
+\***************************/
 byte resetMIDI = 4; //Tied to VS1053 Reset line
 byte ledPin = 13; //MIDI traffic inidicator
+SoftwareSerial mySerial(2, 3); // RX, TX 
 
-int valA = 0;
 
 
-uint8_t option = 0;
-uint8_t data = 0;
+
+
+/***************************\
+*                           *
+*    Velostat Variables     *
+*                           *
+*                           *
+\***************************/
+int drumSens = 600;
+int valA = 0; //Velostat value
 
 
 
 void setup() {
-   Serial.begin(9600);
+  //Hardware serial start
+  Serial.begin(19200);
+  Serial.print("Serial started");
+
+  //Neopixel LED Code
   // This is for Trinket 5V 16MHz, you can remove these three lines if you are not using a Trinket
   #if defined (__AVR_ATtiny85__)
     if (F_CPU == 16000000) clock_prescale_set(clock_div_1);
   #endif
   // End of trinket special code
-
-
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
 
-  pinMode(statusLed, OUTPUT);
+
+  //Xbee setup
+  pinMode(statusLed, OUTPUT); 
   pinMode(errorLed, OUTPUT);
   pinMode(dataLed,  OUTPUT);
+  xbeeSoftSerial.begin(9600); //Xbee serial start
+  xbee.setSerial(xbeeSoftSerial); //Asign software serial port 
   
-  // start serial
-  Serial.begin(19200);
-  xbeeSoftSerial.begin(9600);
-  xbee.setSerial(xbeeSoftSerial);
   
-  //MIDI stuff
-  mySerial.begin(31250);
-
+  
+  
+  //MIDI setup
+  mySerial.begin(31250); //Serial start
   //Reset the VS1053 playCNote(74, 100);
   pinMode(resetMIDI, OUTPUT);
   digitalWrite(resetMIDI, LOW);
   delay(100);
   digitalWrite(resetMIDI, HIGH);
   delay(100);
-  //talkMIDI(0xB0, 0x07, 127); //0xB0 is channel message, set channel volume to near max (127)
-  Serial.print("Serial started");
+  talkMIDI(0xB0, 0x07, 127); //Set channel volume to 127
 }
 
-// continuously reads packets, looking for RX16 or RX64
+
 void loop() {
-    int sensorValue = analogRead(DRUM1);
-    if(sensorValue < 650) {
+  
+  //Neopixel LED code
+  int sensorValue = analogRead(DRUM1);
+  if(sensorValue < 650) {
     int y = map(sensorValue, 650, 300, 255, 0);
     allOn(strip.Color(255 - y, y, 0));
   } else {
-    allOff();
+      allOff();
   }
-   delay(5);
+    delay(5);
 
-   readInputs();
-
-   if(valA < drumSens) {
-      playBNote(4, 120);
-      delay(100);
-    } else if (valA > drumSens) {
-      noteOff(0, 59, 120);
-      readInputs();
-      }
-  
-}
-void allOn(uint32_t c) {
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
-    strip.setPixelColor(i, c);
+  //Play note through velostat TODO: Fix rapid note playing issue 
+  readInputs(); //Start reading velostat value
+  if(valA < drumSens) { //If held down
+     playBNote(4, 120);
+     delay(100);
+  } else if (valA > drumSens) { //If released
+     noteOff(0, 59, 120);
+     readInputs();
   }
-  strip.show();
-}
-
-void allOff() {
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
-    strip.setPixelColor(i, strip.Color(0, 0, 0));
-  }
-  strip.show();
-}
-
-
-   
-
-  /*switch(data) {
+     
+/*switch(data) {
   
   case (uint8_t) 1:
     playBNote(4, 120, 500);
@@ -156,7 +175,35 @@ void allOff() {
     //blah
     break;
   } */
-  
+}
+
+/***************************\
+*                           *
+*    Neopixel Functions     *
+*                           *
+*                           *
+\***************************/
+void allOn(uint32_t c) {
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+    strip.setPixelColor(i, c);
+  }
+  strip.show();
+}
+
+void allOff() {
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+    strip.setPixelColor(i, strip.Color(0, 0, 0));
+  }
+  strip.show();
+}
+
+
+/***************************\
+*                           *
+*     Velostat Reading      *
+*                           *
+*                           *
+\***************************/
 void readInputs() {
   valA = analogRead(DRUM1);  // Read the voltage
   Serial.println(valA, DEC); // Print the voltseSerial.println(valAHex);tage to the terminal
@@ -164,7 +211,12 @@ void readInputs() {
 
 
 
-//MIDI note declaration
+/***************************\
+*                           *
+*   MIDI Note Declarations  *
+*                           *
+*                           *
+\***************************/
 void playANote(byte instrument, byte noteVelocity, int duration) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
   noteOn(0, 57, noteVelocity);
@@ -174,28 +226,24 @@ void playANote(byte instrument, byte noteVelocity, int duration) {
   
 void playBNote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
+  
   if(valA > drumSens){
-    //noteOff(0, 59, noteVelocity);
-    readInputs();
+    readInputs(); //Useless
   }
+  
   readInputs();
   noteOn(0, 59, noteVelocity);
 }
 
-void playCNote(byte instrument) {
+void playCNote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
-  //talkMIDI(0xB0, 12, )
-  //setVolume();
-
-  //Volume setting stuff
-  if (valA < drumSens) {
-    do { 
-      readInputs();
-      noteOn(0, 60, 120);
-      } while(valA < drumSens);
-    } else {
-        noteOff(0, 60, 120);
-      }
+  
+  if(valA > drumSens){
+    readInputs(); //uselss
+  }
+  
+  readInputs();
+  noteOn(0, 60, noteVelocity);
 }
 
 void playDNote(byte instrument, byte noteVelocity, int duration) {
@@ -228,16 +276,24 @@ void playGNote(byte instrument, byte noteVelocity, int duration) {
 
 
 
+/***************************\
+*                           *
+*    MIDI Backend Stuff     *
+*                           *
+*                           *
+\***************************/
+
+//Play a note
 void noteOn(byte channel, byte note, byte attack_velocity) {
   talkMIDI( (0x90 | channel), note, attack_velocity);
 }
 
-//Send a MIDI note-off message.  Like releasing a piano key
+//Release a note
 void noteOff(byte channel, byte note, byte release_velocity) {
   talkMIDI( (0x80 | channel), note, release_velocity);
 }
 
-//Plays a MIDI note. Doesn't check to see that cmd is greater than 127, or that data values are less than 127
+//Sends commands to MIDI chip
 void talkMIDI(byte cmd, byte data1, byte data2) {
   digitalWrite(ledPin, HIGH);
   mySerial.write(cmd);
