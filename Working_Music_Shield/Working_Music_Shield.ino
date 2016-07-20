@@ -1,16 +1,30 @@
 #include <SoftwareSerial.h>
+#include <XBee.h>
 
 #define DRUM1 0 //Analog sensor 1
 int drumSens = 530;
 
 SoftwareSerial mySerial(2, 3); // RX, TX
+SoftwareSerial xbeeSoftSerial(5, 6);
+
+XBee xbee = XBee();
+XBeeResponse response = XBeeResponse();
+
+Rx16Response rx16 = Rx16Response();
+Rx64Response rx64 = Rx64Response();
+
 byte resetMIDI = 4; //Tied to VS1053 Reset line
 byte ledPin = 13; //MIDI traffic inidicator
 int valA = 0;
-#define piezoPin 1
+uint8_t data = 0;
+uint8_t option = 0;
+
 void setup() {
 
-  Serial.begin(57600);
+  Serial.begin(57600);    
+       
+  xbeeSoftSerial.begin(9600);
+  xbee.setSerial(xbeeSoftSerial);
 
   //Setup soft serial for MIDI control
   mySerial.begin(31250);
@@ -28,14 +42,78 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  /**int piezoValue = analogRead(piezoPin);
-  if (piezoValue > 1000) {
-    playCNote(5, 120, 500);
-    } **/
-  //Serial.println(piezoValue);
-  readInputs();
-  playCNote(3);
+    xbee.readPacket();
+    
+    if (xbee.getResponse().isAvailable()) {
+      // got something
+      
+      if (xbee.getResponse().getApiId() == RX_16_RESPONSE || xbee.getResponse().getApiId() == RX_64_RESPONSE) {
+        // got a rx packet
+        
+        if (xbee.getResponse().getApiId() == RX_16_RESPONSE) {
+          xbee.getResponse().getRx16Response(rx16);
+          option = rx16.getOption();
+          data = rx16.getData(0);
+          Serial.print(data);
+          if (data == (uint8_t)4) {
+              playBNote(4, 120, 500);
+          }
+        } else {
+                xbee.getResponse().getRx64Response(rx64);
+          option = rx64.getOption();
+          data = rx64.getData(0);
+        }
+        
+        // TODO check option, rssi bytes    
+        //flashLed(statusLed, 1, 10);
+        
+        // set dataLed PWM to value of the first byte in the data
+        //analogWrite(dataLed, data);
+      } else {
+        // not something we were expecting
+        //flashLed(errorLed, 1, 25);    
+      }
+    } else if (xbee.getResponse().isError()) {
+      //nss.print("Error reading packet.  Error code: ");  
+      //nss.println(xbee.getResponse().getErrorCode());
+      // or flash error led
+    }
+    
+  switch(data) {
+  
+  case (uint8_t) 1:
+    playBNote(4, 120, 500);
+    break;
+    
+  case (uint8_t) 2:
+    //blah
+    break;
+    
+  case (uint8_t) 3:
+    //blah
+    break;
+    
+  case (uint8_t) 4:
+    //blah
+    break;
+    
+  case (uint8_t) 5:
+    //blah
+    break;
+    
+  case (uint8_t) 6:
+    //blah
+    break;
+  case (uint8_t) 7:
+    //blah
+    break;
+  case (uint8_t) 8:
+    //blah
+    break;
+  }
+  
 } 
+
 
 void playANote(byte instrument, byte noteVelocity, int duration) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
@@ -98,38 +176,6 @@ void playGNote(byte instrument, byte noteVelocity, int duration) {
 }
 
 
-/** void maryLamb() {
-  playENote(5, 120, 500);
-  playDNote(5, 120, 500);
-  playCNote(5, 120);
-  playDNote(5, 120, 500);
-  playENote(5, 120, 500);
-  playENote(5, 120, 500);
-  playENote(5, 120, 500);
-  
-  playDNote(5, 120, 500);
-  playDNote(5, 120, 500);
-  playDNote(5, 120, 500);
-  playENote(5, 120, 500);
-  playGNote(5, 120, 500);
-  playGNote(5, 120, 500);
-
-  playENote(5, 120, 500);
-  playDNote(5, 120, 500);
-  playCNote(5, 120);
-  playDNote(5, 120, 500);
-  playENote(5, 120, 500);
-  playENote(5, 120, 500);
-  playENote(5, 120, 500);
-
-  playENote(5, 120, 500);
-  playDNote(5, 120, 500);
-  playDNote(5, 120, 500);
-  playENote(5, 120, 500);
-  playDNote(5, 120, 500);
-  playCNote(5, 120);
-  
-} **/
 
 void noteOn(byte channel, byte note, byte attack_velocity) {
   talkMIDI( (0x90 | channel), note, attack_velocity);
@@ -159,15 +205,7 @@ void readInputs() {
   Serial.println(valA, DEC); // Print the voltseSerial.println(valAHex);tage to the terminal
 }
 
-void setVolume() {
-  int desiredVolume = 0;
-  int volRange = (drumSens - valA);
-  int volMult = (volRange * 50);
-  desiredVolume = map(volMult, 0, drumSens, 0, 16383);
-  //desiredVolume = constrain(desiredVolume, 0, 16383); 
-  //Serial.println("Vol: " + desiredVolume);
-  talkMIDI(0xB0, 7, 100);
-}
+
 
 
 
