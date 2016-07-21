@@ -67,6 +67,7 @@ SoftwareSerial xbeeSoftSerial(A0, A1); // RX, TX
 \***************************/
 byte resetMIDI = 4; //Tied to VS1053 Reset line
 byte ledPin = 13; //MIDI traffic inidicator
+bool isPlaying = false;
 SoftwareSerial mySerial(2, 3); // RX, TX 
 
 
@@ -81,6 +82,8 @@ SoftwareSerial mySerial(2, 3); // RX, TX
 \***************************/
 int drumSens = 600;
 int valA = 0; //Velostat value
+uint32_t currentLED;
+
 
 
 
@@ -118,28 +121,36 @@ void setup() {
   digitalWrite(resetMIDI, HIGH);
   delay(100);
   talkMIDI(0xB0, 0x07, 127); //Set channel volume to 127
+  fadeOff();
+  playCNote(70, 120);
+  delay(500);
+  noteOff(0, 60, 120);
 }
 
 
 void loop() {
-  
   //Neopixel LED code
   int sensorValue = analogRead(DRUM1);
   if(sensorValue < 650) {
     int y = map(sensorValue, 650, 300, 255, 0);
     allOn(strip.Color(255 - y, y, 0));
+    currentLED = strip.Color(255 - y, y, 0);
   } else {
-      allOff();
+      pixelDefault();
   }
     delay(5);
 
   //Play note through velostat TODO: Fix rapid note playing issue 
   readInputs(); //Start reading velostat value
   if(valA < drumSens) { //If held down
-     playBNote(4, 120);
-     delay(100);
+    if(!isPlaying) {
+      playBNote(4, 120);
+      isPlaying = true;
+      //delay(100);
+      }
   } else if (valA > drumSens) { //If released
      noteOff(0, 59, 120);
+     isPlaying = false;
      readInputs();
   }
      
@@ -190,11 +201,28 @@ void allOn(uint32_t c) {
   strip.show();
 }
 
+void pixelDefault() {
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+    strip.setPixelColor(i, strip.Color(255, 250, 250));
+  }
+  strip.show();  
+}
+
 void allOff() {
   for(uint16_t i=0; i<strip.numPixels(); i++) {
     strip.setPixelColor(i, strip.Color(0, 0, 0));
   }
   strip.show();
+}
+
+int fadeOff() {
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+       strip.setPixelColor(i, 255 - i, 255 - i, 255 - i);
+       Serial.print("Ffading");     
+       strip.show();
+       delay(20);       
+    }
+    allOff();
 }
 
 
