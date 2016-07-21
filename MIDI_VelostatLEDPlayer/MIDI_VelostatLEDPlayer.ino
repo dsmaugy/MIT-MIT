@@ -1,5 +1,6 @@
+
+
 //Library inclusions
-#include <Adafruit_NeoPixel.h>
 #include <XBee.h>
 #include <SoftwareSerial.h>
 #include <Adafruit_NeoPixel.h>
@@ -80,8 +81,8 @@ SoftwareSerial mySerial(2, 3); // RX, TX
 *                           *
 *                           *
 \***************************/
-int drumSens = 370;
-int drumMinimum = 260;
+int drumSens = 520;
+int drumMinimum = 350;
 int valA = 0; //Velostat value
 uint32_t currentLED;
 
@@ -132,10 +133,11 @@ void setup() {
 void loop() {
   //Neopixel LED code
   int sensorValue = analogRead(DRUM1);
-  if(sensorValue < 350) {
+  if(sensorValue < drumSens) {
     int y = map(sensorValue, drumSens, drumMinimum, 255, 0);
-    constrain(y, 0, 255);
+    y = constrain(y, 0, 255);
     allOn(strip.Color(255 - y, y, 0));
+    //Serial.println(y);
     currentLED = strip.Color(255 - y, y, 0);
   } else {
       pixelDefault();
@@ -148,7 +150,7 @@ void loop() {
     if(!isPlaying) {
       playBNote(4, 120);
       isPlaying = true;
-      //delay(100);
+      //Serial.println(valA);
       }
   } else if (valA > drumSens) { //If released
      noteOff(0, 59, 120);
@@ -200,6 +202,7 @@ void allOn(uint32_t c) {
   for(uint16_t i=0; i<strip.numPixels(); i++) {
     strip.setPixelColor(i, c);
   }
+  strip.setBrightness(90);
   strip.show();
 }
 
@@ -207,6 +210,7 @@ void pixelDefault() {
   for(uint16_t i=0; i<strip.numPixels(); i++) {
     strip.setPixelColor(i, strip.Color(255, 250, 250));
   }
+  strip.setBrightness(30);
   strip.show();  
 }
 
@@ -219,8 +223,7 @@ void allOff() {
 
 int fadeOff() {
   for(uint16_t i=0; i<strip.numPixels(); i++) {
-       strip.setPixelColor(i, 255 - i, 255 - i, 255 - i);
-       Serial.print("Ffading");     
+       strip.setPixelColor(i, 255 - i, 255 - i, 255 - i);    
        strip.show();
        delay(20);       
     }
@@ -247,11 +250,15 @@ void readInputs() {
 *                           *
 *                           *
 \***************************/
-void playANote(byte instrument, byte noteVelocity, int duration) {
+void playANote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
+  
+  if(valA > drumSens){
+    readInputs(); //Useless
+  }
+  
+  readInputs();
   noteOn(0, 57, noteVelocity);
-  delay(duration);
-  noteOff(0, 57, noteVelocity);
 }
   
 void playBNote(byte instrument, byte noteVelocity) {
@@ -276,32 +283,48 @@ void playCNote(byte instrument, byte noteVelocity) {
   noteOn(0, 60, noteVelocity);
 }
 
-void playDNote(byte instrument, byte noteVelocity, int duration) {
+void playDNote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
+  
+  if(valA > drumSens){
+    readInputs(); //uselss
+  }
+  
+  readInputs();
   noteOn(0, 62, noteVelocity);
-  delay(duration);
-  noteOff(0, 62, noteVelocity);
 }
 
-void playENote(byte instrument, byte noteVelocity, int duration) {
+void playENote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
+  
+  if(valA > drumSens){
+    readInputs(); //uselss
+  }
+  
+  readInputs();
   noteOn(0, 64, noteVelocity);
-  delay(duration);
-  noteOff(0, 64, noteVelocity);
 }
 
-void playFNote(byte instrument, byte noteVelocity, int duration) {
+void playFNote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
+  
+  if(valA > drumSens){
+    readInputs(); //uselss
+  }
+  
+  readInputs();
   noteOn(0, 65, noteVelocity);
-  delay(duration);
-  noteOff(0, 65, noteVelocity);
 }
 
-void playGNote(byte instrument, byte noteVelocity, int duration) {
+void playGNote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
+  
+  if(valA > drumSens){
+    readInputs(); //uselss
+  }
+  
+  readInputs();
   noteOn(0, 67, noteVelocity);
-  delay(duration);
-  noteOff(0, 67, noteVelocity);
 }
 
 
@@ -310,7 +333,7 @@ void playGNote(byte instrument, byte noteVelocity, int duration) {
 *                           *
 *    MIDI Backend Stuff     *
 *                           *
-*                           *
+*                           *c
 \***************************/
 
 //Play a note
