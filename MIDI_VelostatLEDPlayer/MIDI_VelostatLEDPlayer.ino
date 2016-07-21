@@ -80,7 +80,8 @@ SoftwareSerial mySerial(2, 3); // RX, TX
 *                           *
 *                           *
 \***************************/
-int drumSens = 600;
+int drumSens = 370;
+int drumMinimum = 260;
 int valA = 0; //Velostat value
 uint32_t currentLED;
 
@@ -131,8 +132,9 @@ void setup() {
 void loop() {
   //Neopixel LED code
   int sensorValue = analogRead(DRUM1);
-  if(sensorValue < 650) {
-    int y = map(sensorValue, 650, 300, 255, 0);
+  if(sensorValue < 350) {
+    int y = map(sensorValue, drumSens, drumMinimum, 255, 0);
+    constrain(y, 0, 255);
     allOn(strip.Color(255 - y, y, 0));
     currentLED = strip.Color(255 - y, y, 0);
   } else {
