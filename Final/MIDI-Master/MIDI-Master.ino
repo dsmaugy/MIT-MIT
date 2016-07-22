@@ -17,6 +17,7 @@ byte ledPin = 13; //MIDI traffic inidicator
 int valA = 0;
 uint8_t data = 0;
 uint8_t option = 0;
+uint8_t lastNotePlayed;
 
 void setup() {
 
@@ -52,6 +53,9 @@ void loop() {
           xbee.getResponse().getRx16Response(rx16);
           option = rx16.getOption();
           data = rx16.getData(0);
+          if (data !== 0) {
+              lastNotePlayed = data;
+            }
           Serial.print(data);
         } else {
           xbee.getResponse().getRx64Response(rx64);
@@ -77,7 +81,7 @@ void loop() {
   switch(data) {
 
   case (uint8_t) 0:
-    noteOff(0, 59, 120+);
+    arbitNoteOff(lastNotePlayed);
     break;
   
   case (uint8_t) 1:
@@ -114,6 +118,23 @@ void loop() {
   
 } 
 
+void arbitNoteOff(uint8_t whichNote) { //Arbitrary note off
+  switch (whichNote) {
+    case (uint8_t) 1:
+      noteOff(0, 57, 120);
+      break;
+    case (uint8_t) 2:
+      noteOff(0, 59, 120);
+      break;
+    case (uint8_t) 3:
+      noteOff(0, 60, 120);
+      break;
+    case (uint8_t) 4:
+      noteOff(0, 62, 120);
+      break;
+     
+   }
+}
 
 void playANote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
