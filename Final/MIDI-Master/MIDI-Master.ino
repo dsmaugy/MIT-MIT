@@ -19,6 +19,8 @@ uint8_t data = 0;
 uint8_t option = 0;
 uint8_t lastNotePlayed;
 
+bool isPlaying = false;
+
 void setup() {
 
   Serial.begin(9600);    
@@ -36,7 +38,11 @@ void setup() {
   delay(100);
   talkMIDI(0xB0, 0x07, 127); //0xB0 is channel message, set channel volume to near max (127)
   //talkMIDI(0xC0. 5, 0x00);
-  //noteOn(0, 60, 127);
+
+  //Startup check
+  noteOn(0, 60, 127);
+  delay(500);
+  noteOff(0, 60, 120);
 }
 
 void loop() {
@@ -53,7 +59,7 @@ void loop() {
           xbee.getResponse().getRx16Response(rx16);
           option = rx16.getOption();
           data = rx16.getData(0);
-          if (data !== 0) {
+          if (data != 0) {
               lastNotePlayed = data;
             }
           Serial.print(data);
@@ -85,7 +91,11 @@ void loop() {
     break;
   
   case (uint8_t) 1:
-    playBNote(4, 120, 500);
+    Serial.print("B NOTE PLAYED");
+    if (!isPlaying) {
+        playBNote(4, 120);
+        isPlaying = false;
+      }
     break;
     
   case (uint8_t) 2:
@@ -140,21 +150,15 @@ void playANote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
   
   if(valA > drumSens){
-    readInputs(); //Useless
+    //(); //Useless
   }
   
-  readInputs();
+  //();
   noteOn(0, 57, noteVelocity);
 }
   
 void playBNote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
-  
-  if(valA > drumSens){
-    readInputs(); //Useless
-  }
-  
-  readInputs();
   noteOn(0, 59, noteVelocity);
 }
 
@@ -162,10 +166,10 @@ void playCNote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
   
   if(valA > drumSens){
-    readInputs(); //uselss
+    //(); //uselss
   }
   
-  readInputs();
+  //();
   noteOn(0, 60, noteVelocity);
 }
 
@@ -173,10 +177,10 @@ void playDNote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
   
   if(valA > drumSens){
-    readInputs(); //uselss
+    //(); //uselss
   }
   
-  readInputs();
+  //();
   noteOn(0, 62, noteVelocity);
 }
 
@@ -184,10 +188,10 @@ void playENote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
   
   if(valA > drumSens){
-    readInputs(); //uselss
+    //(); //uselss
   }
   
-  readInputs();
+  //();
   noteOn(0, 64, noteVelocity);
 }
 
@@ -195,10 +199,10 @@ void playFNote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
   
   if(valA > drumSens){
-    readInputs(); //uselss
+    //(); //uselss
   }
   
-  readInputs();
+  //();
   noteOn(0, 65, noteVelocity);
 }
 
@@ -206,10 +210,10 @@ void playGNote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
   
   if(valA > drumSens){
-    readInputs(); //uselss
+    //(); //uselss
   }
   
-  readInputs();
+  //();
   noteOn(0, 67, noteVelocity);
 }
 

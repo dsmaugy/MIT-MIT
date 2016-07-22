@@ -3,6 +3,7 @@
 #include <SoftwareSerial.h>
 #define MAX_FRAME_DATA_SIZE 110
 SoftwareSerial xbeeSerial(2, 3);
+uint8_t data;
 
 XBee xbeeObj = XBee();
 
@@ -21,7 +22,9 @@ void loop() {
   if (xbeeObj.getResponse().isAvailable()) {
       if (xbeeObj.getResponse().getApiId() == RX_16_RESPONSE) {
           xbeeObj.getResponse().getRx16Response(rx16);
-
+          data = rx16.getData(0);
+          Serial.print(data);
+          
           rx16.getRemoteAddress16();
           rx16.getRssi();
 
