@@ -73,12 +73,23 @@ SoftwareSerial xbeeSerial(2, 3); // RX, TX
 *                           *
 \***************************/
 int drumSens = 520;
-int drumMinimum = 350;
+int drumMinimum = 400;
 int valA = 0; //Velostat value
 uint32_t currentLED;
 bool isPlaying = false;
 
 
+
+
+/***************************\
+*                           *
+*    Neopixel Variables     *
+*                           *
+*                           *
+\***************************/
+
+int fadeTime = 1000;
+int fadeSteps = 10;
 
 
 void setup() {
@@ -101,27 +112,27 @@ void setup() {
   pinMode(errorLed, OUTPUT);
   pinMode(dataLed,  OUTPUT);
   xbee.setSerial(xbeeSerial); //Asign software serial port 
-  fadeOff();
+  spiralOn();
 }
 
 
 void loop() {
   //Neopixel LED code
-  int sensorValue = analogRead(DRUM1);
-  if(sensorValue < drumSens) {
-    int y = map(sensorValue, drumSens, drumMinimum, 255, 0);
+  Serial.println(isTriggered());
+  readInputs();
+  if(isTriggered()) {
+    int y = map(valA, drumSens, drumMinimum, 255, 0);
     y = constrain(y, 0, 255);
     allOn(strip.Color(255 - y, y, 0));
     //Serial.println(y);
     currentLED = strip.Color(255 - y, y, 0);
   } else {
-      pixelDefault();
+      allOff();
   }
     delay(5);
 
   //Play note through velostat TODO: Fix rapid note playing issue 
-  readInputs(); //Start reading velostat value
-  if(valA < drumSens) { //If held down
+  if(isTriggered) { //If held down
     if(!isPlaying) {
       xbee.send(txNoteOn);
       isPlaying = true;
@@ -158,13 +169,10 @@ void pixelDefault() {
 }
 
 void allOff() {
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
-    strip.setPixelColor(i, strip.Color(0, 0, 0));
-  }
-  strip.show();
+  allOn(0x000000);
 }
 
-int fadeOff() {
+int spiralOn() {
   for(uint16_t i=0; i<strip.numPixels(); i++) {
        strip.setPixelColor(i, 255 - i, 255 - i, 255 - i);    
        strip.show();
@@ -182,7 +190,15 @@ int fadeOff() {
 \***************************/
 void readInputs() {
   valA = analogRead(DRUM1);  // Read the voltage
-  Serial.println(valA, DEC); // Print the voltseSerial.println(valAHex);tage to the terminal
+  //Serial.println(valA, DEC); // Print the voltseSerial.println(valAHex);tage to the terminal
+}
+
+bool isTriggered() {
+  readInputs();
+  if(valA < drumSens) {
+    return true;
+  }
+  return false;
 }
 
 
