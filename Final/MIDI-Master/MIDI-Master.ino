@@ -59,10 +59,9 @@ void loop() {
           xbee.getResponse().getRx16Response(rx16);
           option = rx16.getOption();
           data = rx16.getData(0);
-          if (data != 0) {
+          if (data != (uint8_t)0) {
               lastNotePlayed = data;
-            }
-          Serial.print(data);
+          }
         } else {
           xbee.getResponse().getRx64Response(rx64);
           option = rx64.getOption();
@@ -87,6 +86,8 @@ void loop() {
   switch(data) {
 
   case (uint8_t) 0:
+    isPlaying = false;
+    Serial.println(lastNotePlayed);
     arbitNoteOff(lastNotePlayed);
     break;
   
@@ -94,12 +95,16 @@ void loop() {
     Serial.print("B NOTE PLAYED");
     if (!isPlaying) {
         playBNote(4, 120);
-        isPlaying = false;
+        isPlaying = true;
       }
     break;
     
   case (uint8_t) 2:
-    //blah
+    Serial.print("C NOTE PLAYED");
+    if (!isPlaying) {
+        playCNote(4, 120);
+        isPlaying = true;
+      } 
     break;
     
   case (uint8_t) 3:
@@ -131,10 +136,10 @@ void loop() {
 void arbitNoteOff(uint8_t whichNote) { //Arbitrary note off
   switch (whichNote) {
     case (uint8_t) 1:
-      noteOff(0, 57, 120);
+      noteOff(0, 59, 120);
       break;
     case (uint8_t) 2:
-      noteOff(0, 59, 120);
+      noteOff(0, 60, 120);
       break;
     case (uint8_t) 3:
       noteOff(0, 60, 120);
