@@ -73,7 +73,7 @@ SoftwareSerial xbeeSerial(2, 3); // RX, TX
 *                           *
 *                           *
 \***************************/
-int drumSens = 370;
+int drumSens = 400;
 int drumMinimum = 190;
 int valA = 0; //Velostat value
 uint32_t currentLED;
@@ -95,7 +95,7 @@ int fadeSteps = 10;
 
 void setup() {
   //Hardware serial start
-  Serial.begin(19200);
+  Serial.begin(9600);
   Serial.print("Serial started");
 
   //Neopixel LED Code
@@ -112,9 +112,9 @@ void setup() {
   pinMode(statusLed, OUTPUT); 
   pinMode(errorLed, OUTPUT);
   pinMode(dataLed,  OUTPUT);
-  xbee.setSerial(xbeeSerial); //Asign software serial port 
+  xbee.setSerial(Serial); //Asign software serial port 
   spiralOn();
-  payloadOn[0] = 1;
+  payloadOn[0] = 2;
   payloadOff[0] = 0;
   xbee.send(txNoteOn);
 }
@@ -139,7 +139,6 @@ void loop() {
   if(valA < drumSens) { //If held down
     if(!isPlaying) {
       xbee.send(txNoteOn);
-      Serial.println("Note Pressed");
       isPlaying = true;
       readInputs();
       }

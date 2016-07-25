@@ -92,27 +92,35 @@ void loop() {
     break;
   
   case (uint8_t) 1:
-    Serial.print("B NOTE PLAYED");
+    Serial.print("A NOTE PLAYED");
     if (!isPlaying) {
-        playBNote(4, 120);
+        playANote(4, 120);
         isPlaying = true;
       }
     break;
     
   case (uint8_t) 2:
-    Serial.print("C NOTE PLAYED");
+    Serial.print("B NOTE PLAYED");
     if (!isPlaying) {
-        playCNote(4, 120);
+        playBNote(4, 120);
         isPlaying = true;
       } 
     break;
     
   case (uint8_t) 3:
-    //blah
+    Serial.print("C NOTE PLAYED");
+    if (!isPlaying) {
+        playCNote(4, 120);
+        isPlaying = true;
+      }
     break;
     
   case (uint8_t) 4:
-    //blah
+    Serial.print("D NOTE PLAYED");
+    if (!isPlaying) {
+        playDNote(4, 120);
+        isPlaying = true;
+      }
     break;
     
   case (uint8_t) 5:
