@@ -19,6 +19,10 @@ uint8_t data = 0;
 uint8_t option = 0;
 uint8_t lastNotePlayed;
 
+int noteMode = 1;
+//Note Mode 1: C, E, G, B Flat
+//Note Mode 2: F, A, C, E Flat
+
 bool isPlaying = false;
 
 void setup() {
@@ -68,22 +72,15 @@ void loop() {
           option = rx64.getOption();
           data = rx64.getData(0);
         }
-        
-        // TODO check option, rssi bytes    
-        //flashLed(statusLed, 1, 10);
-        
-        // set dataLed PWM to value of the first byte in the data
-        //analogWrite(dataLed, data);
       } else {
-        // not something we were expecting
-        //flashLed(errorLed, 1, 25);    
+          //Weird thing happened 
       }
     } else if (xbee.getResponse().isError()) {
       //nss.print("Error reading packet.  Error code: ");  
       //nss.println(xbee.getResponse().getErrorCode());
       // or flash error led
     }
-    
+//F, A, C, D#
   switch(data) {
 
   case (uint8_t) 0:
@@ -93,83 +90,111 @@ void loop() {
     break;
   
   case (uint8_t) 1:
-    Serial.println("A NOTE PLAYED");
     if (!isPlaying) {
-        playANote(4, 120);
-        isPlaying = true;
+      if (noteMode == 1) {
+          Serial.println("C NOTE PLAYED");
+          playCNote(4, 120);
+          isPlaying = true;
+        } else if (noteMode == 2) {
+          Serial.println("F FLAT NOTE PLAYED");
+          playFNote(4, 120);
+          isPlaying = true;
+         }
       }
     break;
     
   case (uint8_t) 2:
-    Serial.println("B NOTE PLAYED");
     if (!isPlaying) {
-        playBNote(4, 120);
-        isPlaying = true;
-      } 
+      if (noteMode == 1) {
+          Serial.println("E NOTE PLAYED");
+          playENote(4, 120);
+          isPlaying = true;
+        } else if (noteMode == 2) {
+          Serial.println("A NOTE PLAYED");
+          playANote(4, 120);
+          isPlaying = true;
+          break;
+         }
+      }
     break;
     
   case (uint8_t) 3:
-    Serial.println("C NOTE PLAYED");
     if (!isPlaying) {
-        playCNote(4, 120);
-        isPlaying = true;
+      if (noteMode == 1) {
+          Serial.println("G NOTE PLAYED");
+          playGNote(4, 120);
+          isPlaying = true;
+        } else if (noteMode == 2) {
+          Serial.println("C NOTE PLAYED");
+          playCNote(4, 120);
+          isPlaying = true;
+         }
       }
     break;
     
   case (uint8_t) 4:
-    Serial.println("D NOTE PLAYED");
     if (!isPlaying) {
-        playDNote(4, 120);
-        isPlaying = true;
+      if (noteMode == 1) {
+          Serial.println("B FLAT NOTE PLAYED");
+          playBFlatNote(4, 120);
+          isPlaying = true;
+        } else if (noteMode == 2) {
+          Serial.println("E FLAT NOTE PLAYED");
+          playEFlatNote(4, 120);
+          isPlaying = true;
+         }
       }
     break;
-    
-  case (uint8_t) 5:
-    //noteOff(0, 59, 120);
-    //Serial.print("B NOTE STOPPED");
-    break;
-    
-  case (uint8_t) 6:
-    //blah
-    break;
-  case (uint8_t) 7:
-    //blah
-    break;
-  case (uint8_t) 8:
-    //blah
-    break;
   }
-  
-  
 } 
 
 void arbitNoteOff(uint8_t whichNote) { //Arbitrary note off
   switch (whichNote) {
     case (uint8_t) 1:
-      noteOff(0, 57, 120);
+      if(noteMode == 1) {
+        noteOff(0, 60, 120);
+      } else if (noteMode == 2) {
+        noteOff(0, 65, 120);
+        }
       break;
     case (uint8_t) 2:
-      noteOff(0, 59, 120);
+      if(noteMode == 1) {
+        noteOff(0, 64, 120);
+      } else if (noteMode == 2) {
+        noteOff(0, 57, 120);
+        }
       break;
     case (uint8_t) 3:
-      noteOff(0, 60, 120);
+      if(noteMode == 1) {
+        noteOff(0, 67, 120);
+      } else if (noteMode == 2) {
+        noteOff(0, 60, 120);
+        }
       break;
     case (uint8_t) 4:
-      noteOff(0, 62, 120);
+      if(noteMode == 1) {
+        noteOff(0, 70, 120);
+      } else if (noteMode == 2) {
+        noteOff(0, 63, 120);
+        }
       break;
      
    }
 }
 
+void playAFlatNote(byte instrument, byte noteVelocity) {
+  talkMIDI(0xC0, instrument, 0x00); //Instrument Change
+  noteOn(0, 68, noteVelocity);
+}
+
 void playANote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
-  
-  if(valA > drumSens){
-    //(); //Useless
-  }
-  
-  //();
   noteOn(0, 57, noteVelocity);
+}
+
+void playBFlatNote(byte instrument, byte noteVelocity) {
+  talkMIDI(0xC0, instrument, 0x00); //Instrument Change
+  noteOn(0, 70, noteVelocity);
 }
   
 void playBNote(byte instrument, byte noteVelocity) {
@@ -177,58 +202,34 @@ void playBNote(byte instrument, byte noteVelocity) {
   noteOn(0, 59, noteVelocity);
 }
 
+
 void playCNote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
-  
-  if(valA > drumSens){
-    //(); //uselss
-  }
-  
-  //();
   noteOn(0, 60, noteVelocity);
 }
 
 void playDNote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
-  
-  if(valA > drumSens){
-    //(); //uselss
-  }
-  
-  //();
   noteOn(0, 62, noteVelocity);
+}
+
+void playEFlatNote(byte instrument, byte noteVelocity) {
+  talkMIDI(0xC0, instrument, 0x00); //Instrument Change
+  noteOn(0, 63, noteVelocity);
 }
 
 void playENote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
-  
-  if(valA > drumSens){
-    //(); //uselss
-  }
-  
-  //();
   noteOn(0, 64, noteVelocity);
 }
 
 void playFNote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
-  
-  if(valA > drumSens){
-    //(); //uselss
-  }
-  
-  //();
   noteOn(0, 65, noteVelocity);
 }
 
 void playGNote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
-  
-  if(valA > drumSens){
-    //(); //uselss
-  }
-  
-  //();
   noteOn(0, 67, noteVelocity);
 }
 

@@ -73,7 +73,7 @@ SoftwareSerial xbeeSerial(2, 3); // RX, TX
 *                           *
 *                           *
 \***************************/
-int drumSens = 565;
+int drumSens = 620;
 int drumMinimum = 480;
 int valA = 0; //Velostat value
 uint32_t currentLED;
@@ -115,7 +115,7 @@ void setup() {
   xbee.setSerial(Serial); //Asign software serial port 
   spiralOn();
   payloadOn[0] = 2;
-  payloadOff[0] = 5;
+  payloadOff[0] = 0;
 }
 
 
