@@ -19,6 +19,8 @@ uint8_t data = 0;
 uint8_t option = 0;
 uint8_t lastNotePlayed;
 
+byte instrument = 70;
+
 int noteMode = 1;
 //Note Mode 1: C, E, G, B Flat
 //Note Mode 2: F, A, C, E Flat
@@ -27,8 +29,11 @@ bool isPlaying = false;
 
 void setup() {
 
-  Serial.begin(9600);    
+  Serial.begin(9600);   
   Serial.println("Serial started");
+
+  Serial.println("Mode: " + instrument); 
+  delay(50);
   
   xbee.setSerial(Serial);
 
@@ -64,6 +69,7 @@ void loop() {
           xbee.getResponse().getRx16Response(rx16);
           option = rx16.getOption();
           data = rx16.getData(0);
+          Serial.println(data);
           if (data != (uint8_t)0) {
               lastNotePlayed = data;
           }
@@ -85,20 +91,22 @@ void loop() {
 
   case (uint8_t) 0:
     isPlaying = false;
-    Serial.println(lastNotePlayed);
-    arbitNoteOff(lastNotePlayed);
+    //Serial.println(lastNotePlayed);
+    //arbitNoteOff(lastNotePlayed);
     break;
   
   case (uint8_t) 1:
     if (!isPlaying) {
       if (noteMode == 1) {
           Serial.println("C NOTE PLAYED");
-          playCNote(4, 120);
+          playCNote(instrument, 120);
           isPlaying = true;
+          break;
         } else if (noteMode == 2) {
           Serial.println("F FLAT NOTE PLAYED");
-          playFNote(4, 120);
+          playFNote(instrument, 120);
           isPlaying = true;
+          break;
          }
       }
     break;
@@ -107,11 +115,12 @@ void loop() {
     if (!isPlaying) {
       if (noteMode == 1) {
           Serial.println("E NOTE PLAYED");
-          playENote(4, 120);
+          playENote(instrument, 120);
           isPlaying = true;
+          break;
         } else if (noteMode == 2) {
           Serial.println("A NOTE PLAYED");
-          playANote(4, 120);
+          playANote(instrument, 120);
           isPlaying = true;
           break;
          }
@@ -122,12 +131,14 @@ void loop() {
     if (!isPlaying) {
       if (noteMode == 1) {
           Serial.println("G NOTE PLAYED");
-          playGNote(4, 120);
+          playGNote(instrument, 120);
           isPlaying = true;
+          break;
         } else if (noteMode == 2) {
           Serial.println("C NOTE PLAYED");
-          playCNote(4, 120);
+          playCNote(instrument, 120);
           isPlaying = true;
+          break;
          }
       }
     break;
@@ -136,14 +147,56 @@ void loop() {
     if (!isPlaying) {
       if (noteMode == 1) {
           Serial.println("B FLAT NOTE PLAYED");
-          playBFlatNote(4, 120);
+          playBFlatNote(instrument, 120);
           isPlaying = true;
+          break;
         } else if (noteMode == 2) {
           Serial.println("E FLAT NOTE PLAYED");
-          playEFlatNote(4, 120);
+          playEFlatNote(instrument, 120);
           isPlaying = true;
+          break;
          }
       }
+    break;
+
+   case (uint8_t) 5:
+    if(noteMode == 1) {
+        noteOff(0, 60, 120);
+        isPlaying = false;
+      } else if (noteMode == 2) {
+        noteOff(0, 65, 120);
+        isPlaying = false;
+        }
+    break;
+
+   case (uint8_t) 6:
+    if(noteMode == 1) {
+        noteOff(0, 64, 120);
+        isPlaying = false;
+      } else if (noteMode == 2) {
+        noteOff(0, 57, 120);
+        isPlaying = false;
+        }
+    break;
+
+   case (uint8_t) 7:
+    if(noteMode == 1) {
+        noteOff(0, 67, 120);
+        isPlaying = false;
+      } else if (noteMode == 2) {
+        noteOff(0, 60, 120);
+        isPlaying = false;
+      }
+    break;
+
+   case (uint8_t) 8:
+    if(noteMode == 1) {
+        noteOff(0, 70, 120);
+        isPlaying = false;
+      } else if (noteMode == 2) {
+        noteOff(0, 63, 120);
+        isPlaying = false;
+        }
     break;
   }
 } 
