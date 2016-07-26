@@ -142,10 +142,7 @@ void loop() {
       readInputs();
       }
   } else if (valA > drumSens) { //If released
-    if(isPlaying = true) {
-      xbee.send(txNoteOff);
-      Serial.println("Note just released");
-      }
+     xbee.send(txNoteOff);
      isPlaying = false;
      readInputs();
   }

@@ -125,8 +125,8 @@ void loop() {
     break;
     
   case (uint8_t) 5:
-    noteOff(0, 59, 120);
-    Serial.print("B NOTE STOPPED");
+    //noteOff(0, 59, 120);
+    //Serial.print("B NOTE STOPPED");
     break;
     
   case (uint8_t) 6:
