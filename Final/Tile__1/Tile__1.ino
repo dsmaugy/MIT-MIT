@@ -45,6 +45,7 @@ int dataLed = 10;
 int dataCorrectLed = 13;
 uint8_t payloadOn[] = {0};
 uint8_t payloadOff[] = {0};
+uint8_t payloadNeutral[] = {0};
 
 
 
@@ -56,6 +57,7 @@ Rx16Response rx16 = Rx16Response();
 Rx64Response rx64 = Rx64Response();
 Tx16Request txNoteOn = Tx16Request(0x1874, payloadOn, sizeof(payloadOn));
 Tx16Request txNoteOff = Tx16Request(0x1874, payloadOff, sizeof(payloadOff));
+Tx16Request txNoteNeutral = Tx16Request(0x1874, payloadNeutral, sizeof(payloadNeutral));
 
 //Serial initialization
 
@@ -73,7 +75,7 @@ SoftwareSerial xbeeSerial(2, 3); // RX, TX
 *                           *
 *                           *
 \***************************/
-int drumSens = 565;
+int drumSens = 620;
 int drumMinimum = 480;
 int valA = 0; //Velostat value
 uint32_t currentLED;
@@ -116,6 +118,7 @@ void setup() {
   spiralOn();
   payloadOn[0] = 2;
   payloadOff[0] = 5;
+  payloadNeutral[0] = 8;
 }
 
 
@@ -146,7 +149,9 @@ void loop() {
      Serial.println("Note just released");
      isPlaying = false;
      readInputs();
-  }
+  } else {
+    xbee.send(txNoteNeutral);
+    }
 }
      
 
