@@ -73,8 +73,8 @@ SoftwareSerial xbeeSerial(2, 3); // RX, TX
 *                           *
 *                           *
 \***************************/
-int drumSens = 615;
-int drumMinimum = 400;
+int drumSens = 565;
+int drumMinimum = 480;
 int valA = 0; //Velostat value
 uint32_t currentLED;
 bool isPlaying = false;
@@ -115,8 +115,7 @@ void setup() {
   xbee.setSerial(Serial); //Asign software serial port 
   spiralOn();
   payloadOn[0] = 2;
-  payloadOff[0] = 0;
-  xbee.send(txNoteOn);
+  payloadOff[0] = 5;
 }
 
 
@@ -143,7 +142,10 @@ void loop() {
       readInputs();
       }
   } else if (valA > drumSens) { //If released
-     xbee.send(txNoteOff);
+    if(isPlaying = true) {
+      xbee.send(txNoteOff);
+      Serial.println("Note just released");
+      }
      isPlaying = false;
      readInputs();
   }
@@ -180,7 +182,7 @@ int spiralOn() {
   for(uint16_t i=0; i<strip.numPixels(); i++) {
        strip.setPixelColor(i, 255 - i, 255 - i, 255 - i);    
        strip.show();
-       delay(20);       
+       delay(30);       
     }
     allOff();
 }

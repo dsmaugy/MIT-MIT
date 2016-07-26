@@ -24,7 +24,8 @@ bool isPlaying = false;
 void setup() {
 
   Serial.begin(9600);    
-       
+  Serial.println("Serial started");
+  
   xbee.setSerial(Serial);
 
   //Setup soft serial for MIDI control
@@ -92,7 +93,7 @@ void loop() {
     break;
   
   case (uint8_t) 1:
-    Serial.print("A NOTE PLAYED");
+    Serial.println("A NOTE PLAYED");
     if (!isPlaying) {
         playANote(4, 120);
         isPlaying = true;
@@ -100,7 +101,7 @@ void loop() {
     break;
     
   case (uint8_t) 2:
-    Serial.print("B NOTE PLAYED");
+    Serial.println("B NOTE PLAYED");
     if (!isPlaying) {
         playBNote(4, 120);
         isPlaying = true;
@@ -108,7 +109,7 @@ void loop() {
     break;
     
   case (uint8_t) 3:
-    Serial.print("C NOTE PLAYED");
+    Serial.println("C NOTE PLAYED");
     if (!isPlaying) {
         playCNote(4, 120);
         isPlaying = true;
@@ -116,7 +117,7 @@ void loop() {
     break;
     
   case (uint8_t) 4:
-    Serial.print("D NOTE PLAYED");
+    Serial.println("D NOTE PLAYED");
     if (!isPlaying) {
         playDNote(4, 120);
         isPlaying = true;
@@ -125,6 +126,7 @@ void loop() {
     
   case (uint8_t) 5:
     noteOff(0, 59, 120);
+    Serial.print("B NOTE STOPPED");
     break;
     
   case (uint8_t) 6:
