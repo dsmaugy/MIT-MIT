@@ -11,7 +11,7 @@
 #endif
 
 //Constants
-#define PIN 8
+#define PIN 9
 #define DRUM1 0 //Analog sensor 1
 
 // Parameter 1 = number of pixels in strip
@@ -73,8 +73,8 @@ SoftwareSerial xbeeSerial(2, 3); // RX, TX
 *                           *
 *                           *
 \***************************/
-int drumSens = 400;
-int drumMinimum = 190;
+int drumSens = 615;
+int drumMinimum = 400;
 int valA = 0; //Velostat value
 uint32_t currentLED;
 bool isPlaying = false;

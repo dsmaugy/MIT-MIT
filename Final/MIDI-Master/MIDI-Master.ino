@@ -124,7 +124,7 @@ void loop() {
     break;
     
   case (uint8_t) 5:
-    //blah
+    noteOff(0, 59, 120);
     break;
     
   case (uint8_t) 6:
@@ -144,10 +144,10 @@ void loop() {
 void arbitNoteOff(uint8_t whichNote) { //Arbitrary note off
   switch (whichNote) {
     case (uint8_t) 1:
-      noteOff(0, 59, 120);
+      noteOff(0, 57, 120);
       break;
     case (uint8_t) 2:
-      noteOff(0, 60, 120);
+      noteOff(0, 59, 120);
       break;
     case (uint8_t) 3:
       noteOff(0, 60, 120);
