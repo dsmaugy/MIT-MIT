@@ -116,8 +116,8 @@ void setup() {
   pinMode(dataLed,  OUTPUT);
   xbee.setSerial(Serial); //Asign software serial port 
   spiralOn();
-  payloadOn[0] = 4;
-  payloadOff[0] = 8;
+  payloadOn[0] = 3;
+  payloadOff[0] = 7;
   payloadNeutral[0] = 10;
 }
 

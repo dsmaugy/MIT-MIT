@@ -1,4 +1,4 @@
- 
+  
 
 //Library inclusions
 #include <XBee.h>
@@ -116,8 +116,8 @@ void setup() {
   pinMode(dataLed,  OUTPUT);
   xbee.setSerial(Serial); //Asign software serial port 
   spiralOn();
-  payloadOn[0] = 3;
-  payloadOff[0] = 7;
+  payloadOn[0] = 2;
+  payloadOff[0] = 6;
   payloadNeutral[0] = 10;
 }
 
