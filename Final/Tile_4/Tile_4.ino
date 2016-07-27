@@ -11,7 +11,7 @@
 #endif
 
 //Constants
-#define PIN 9
+#define PIN 10
 #define DRUM1 0 //Analog sensor 1
 
 // Parameter 1 = number of pixels in strip
@@ -26,7 +26,7 @@
 // pixel power leads, add 300 - 500 Ohm resistor on first pixel's data input
 // and minimize distance between Arduino and first pixel.  Avoid connecting
 // on a live circuit...if you must, connect GND first.
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, PIN, NEO_GRBW + NEO_KHZ800);
 
 
 
@@ -75,8 +75,8 @@ SoftwareSerial xbeeSerial(2, 3); // RX, TX
 *                           *
 *                           *
 \***************************/
-int drumSens = 590;
-int drumMinimum = 480;
+int drumSens = 450;
+int drumMinimum = 300;
 int valA = 0; //Velostat value
 uint32_t currentLED;
 bool isPlaying = false;

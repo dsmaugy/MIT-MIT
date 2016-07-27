@@ -16,11 +16,13 @@ uint8_t data = 0;
 uint8_t option = 0;
 uint8_t lastNotePlayed;
 
-byte instrument = 70;
+byte instrument = 41;
+//70 is cool
 
-int noteMode = 3;
+int noteMode = 4 ;
 //Note Mode 1: C, E, G, B Flat
 //Note Mode 2: F, A, C, E Flat
+//Note Mode 3: Chord Mode
 
 bool isPlaying = false;
 
@@ -113,7 +115,11 @@ void loop() {
           playBFlat7Chord();
           isPlaying = true;
           break;
-          }
+        } else if (noteMode == 4) {
+          playCoolChord1();
+          isPlaying = true;
+          break;   
+           }
       }
     break;
     
@@ -134,8 +140,12 @@ void loop() {
           playC7Chord();
           isPlaying = true;
           break;
-          }
+        } else if (noteMode == 4) {
+          playCoolChord2();
+          isPlaying = true;
+          break;   
       }
+    }
     break;
     
   case (uint8_t) 3:
@@ -155,8 +165,12 @@ void loop() {
           playF7Chord();
           isPlaying = true;//<-- Smarter to put this on outside
           break;
-          }
+        } else if (noteMode == 4) {
+          playCoolChord3();
+          isPlaying = true;
+          break;   
       }
+    }
     break;
     
   case (uint8_t) 4:
@@ -175,8 +189,12 @@ void loop() {
           Serial.println("G7 CHORD PLAYED");
           playG7Chord();
           isPlaying = true;
-          }
+        } else if (noteMode == 4) {
+          playCoolChord4();
+          isPlaying = true;
+          break;   
       }
+    }
     break;
 
    case (uint8_t) 5:
@@ -192,7 +210,11 @@ void loop() {
         noteOff(0, 65, 120);  
         noteOff(0, 68, 120);  
         isPlaying = false;  
-          }
+      } else if (noteMode == 4) {
+        noteOff(0, 62, 120);
+        noteOff(0, 66, 120);  
+        noteOff(0, 57, 120);  
+       }
     break;
 
    case (uint8_t) 6:
@@ -210,7 +232,11 @@ void loop() {
         noteOff(0, 70, 120);
         isPlaying = false;
         break;
-          }
+      } else if (noteMode == 4) {
+        noteOff(0, 61, 120);
+        noteOff(0, 64, 120);
+        noteOff(0, 57, 120);            
+            }
     break;
 
    case (uint8_t) 7:
@@ -226,7 +252,11 @@ void loop() {
         noteOff(0, 60, 120);
         noteOff(0, 63, 120);
         isPlaying = false;
-        }
+      } else if (noteMode == 4) {
+        noteOff(0, 62, 120);
+        noteOff(0, 66, 120);
+        noteOff(0, 59, 120);
+          }
     break;
 
    case (uint8_t) 8:
@@ -242,7 +272,11 @@ void loop() {
         noteOff(0, 62, 120);
         noteOff(0, 65, 120);
         isPlaying = false;         
-        }
+      } else if (noteMode == 4) {
+        noteOff(0, 62, 120);
+        noteOff(0, 67, 120);
+        noteOff(0, 59, 120);
+          }
     break;
   }
 }
@@ -273,6 +307,30 @@ void playBFlat7Chord() {
   playDNote(instrument, 120);
   playFNote(instrument, 120);
   playAFlatNote(instrument, 120);
+}
+
+void playCoolChord1() {
+  playDNote(instrument, 120);
+  playGFlatNote(instrument, 120);
+  playANote(instrument, 120);
+}
+
+void playCoolChord2() {
+  playDFlatNote(instrument, 120);
+  playENote(instrument, 120);
+  playANote(instrument, 120);
+}
+
+void playCoolChord3() {
+  playDNote(instrument, 120);
+  playGFlatNote(instrument, 120);
+  playBNote(instrument, 120);
+}
+
+void playCoolChord4() {
+  playDNote(instrument, 120);
+  playGNote(instrument, 120);
+  playBNote(instrument, 120);
 }
 
 void arbitNoteOff(uint8_t whichNote) { //Defunct don't use we should probably delete it to save memory but I like this :(
@@ -335,6 +393,11 @@ void playCNote(byte instrument, byte noteVelocity) {
   noteOn(0, 60, noteVelocity);
 }
 
+void playDFlatNote(byte instrument, byte noteVelocity) {
+  talkMIDI(0xC0, instrument, 0x00); //Instrument Change
+  noteOn(0, 61, noteVelocity);
+}
+
 void playDNote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
   noteOn(0, 62, noteVelocity);
@@ -353,6 +416,11 @@ void playENote(byte instrument, byte noteVelocity) {
 void playFNote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
   noteOn(0, 65, noteVelocity);
+}
+
+void playGFlatNote(byte instrument, byte noteVelocity) {
+  talkMIDI(0xC0, instrument, 0x00); //Instrument Change
+  noteOn(0, 66, noteVelocity);
 }
 
 void playGNote(byte instrument, byte noteVelocity) {
