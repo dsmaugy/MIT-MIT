@@ -109,7 +109,11 @@ void loop() {
           playFNote(instrument, 120);
           isPlaying = true;
           break;
-         }
+        } else if (noteMode == 3) {
+          playBFlat7Chord();
+          isPlaying = true;
+          break;
+          }
       }
     break;
     
@@ -182,7 +186,13 @@ void loop() {
       } else if (noteMode == 2) {
         noteOff(0, 65, 120);
         isPlaying = false;
-        }
+      } else if (noteMode == 3) {
+        noteOff(0, 70, 120);
+        noteOff(0, 62, 120);  
+        noteOff(0, 65, 120);  
+        noteOff(0, 68, 120);  
+        isPlaying = false;  
+          }
     break;
 
    case (uint8_t) 6:
@@ -256,6 +266,13 @@ void playG7Chord() {
   playBNote(instrument, 120); 
   playDNote(instrument, 120); 
   playFNote(instrument, 120);  
+}
+
+void playBFlat7Chord() {
+  playBFlatNote(instrument, 120);
+  playDNote(instrument, 120);
+  playFNote(instrument, 120);
+  playAFlatNote(instrument, 120);
 }
 
 void arbitNoteOff(uint8_t whichNote) { //Defunct don't use we should probably delete it to save memory but I like this :(
