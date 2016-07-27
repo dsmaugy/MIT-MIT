@@ -1,9 +1,6 @@
 #include <SoftwareSerial.h>
 #include <XBee.h>
 
-#define DRUM1 0 //Analog sensor 1
-int drumSens = 530;
-
 SoftwareSerial mySerial(2, 3); // RX, TX
 
 XBee xbee = XBee();
@@ -21,7 +18,7 @@ uint8_t lastNotePlayed;
 
 byte instrument = 70;
 
-int noteMode = 1;
+int noteMode = 3;
 //Note Mode 1: C, E, G, B Flat
 //Note Mode 2: F, A, C, E Flat
 
@@ -32,7 +29,11 @@ void setup() {
   Serial.begin(9600);   
   Serial.println("Serial started");
 
-  Serial.println("Mode: " + instrument); 
+  if (noteMode == 1 || noteMode == 2) {
+    Serial.println("Singular Note Mode");
+    } else if (noteMode == 3) {
+      Serial.println("Chord Mode");
+      }
   delay(50);
   
   xbee.setSerial(Serial);
@@ -69,6 +70,7 @@ void loop() {
           xbee.getResponse().getRx16Response(rx16);
           option = rx16.getOption();
           data = rx16.getData(0);
+          Serial.print("Message: ");
           Serial.println(data);
           if (data != (uint8_t)0) {
               lastNotePlayed = data;
@@ -117,13 +119,18 @@ void loop() {
           Serial.println("E NOTE PLAYED");
           playENote(instrument, 120);
           isPlaying = true;
-          break;
+          break; 
         } else if (noteMode == 2) {
           Serial.println("A NOTE PLAYED");
           playANote(instrument, 120);
           isPlaying = true;
           break;
-         }
+        } else if (noteMode == 3) {
+          Serial.println("C7 CHORD PLAYED");
+          playC7Chord();
+          isPlaying = true;
+          break;
+          }
       }
     break;
     
@@ -139,7 +146,12 @@ void loop() {
           playCNote(instrument, 120);
           isPlaying = true;
           break;
-         }
+         } else if (noteMode == 3) {
+          Serial.println("F7 CHORD PLAYED");
+          playF7Chord();
+          isPlaying = true;//<-- Smarter to put this on outside
+          break;
+          }
       }
     break;
     
@@ -155,7 +167,11 @@ void loop() {
           playEFlatNote(instrument, 120);
           isPlaying = true;
           break;
-         }
+         } else if (noteMode == 3) {
+          Serial.println("G7 CHORD PLAYED");
+          playG7Chord();
+          isPlaying = true;
+          }
       }
     break;
 
@@ -172,11 +188,19 @@ void loop() {
    case (uint8_t) 6:
     if(noteMode == 1) {
         noteOff(0, 64, 120);
-        isPlaying = false;
+        isPlaying = false; 
+        isPlaying= false;
       } else if (noteMode == 2) {
         noteOff(0, 57, 120);
         isPlaying = false;
-        }
+      } else if (noteMode == 3) {
+        noteOff(0, 60, 120);
+        noteOff(0, 64, 120);
+        noteOff(0, 67, 120);
+        noteOff(0, 70, 120);
+        isPlaying = false;
+        break;
+          }
     break;
 
    case (uint8_t) 7:
@@ -186,7 +210,13 @@ void loop() {
       } else if (noteMode == 2) {
         noteOff(0, 60, 120);
         isPlaying = false;
-      }
+      } else if (noteMode == 3) {
+        noteOff(0, 65, 120);
+        noteOff(0, 57, 120);
+        noteOff(0, 60, 120);
+        noteOff(0, 63, 120);
+        isPlaying = false;
+        }
     break;
 
    case (uint8_t) 8:
@@ -196,12 +226,39 @@ void loop() {
       } else if (noteMode == 2) {
         noteOff(0, 63, 120);
         isPlaying = false;
+      } else if (noteMode == 3) {
+        noteOff(0, 67, 120);
+        noteOff(0, 59, 120);
+        noteOff(0, 62, 120);
+        noteOff(0, 65, 120);
+        isPlaying = false;         
         }
     break;
   }
-} 
+}
 
-void arbitNoteOff(uint8_t whichNote) { //Arbitrary note off
+void playC7Chord() {
+  playCNote(instrument, 120);
+  playENote(instrument, 120);
+  playGNote(instrument, 120);
+  playBFlatNote(instrument, 120);  
+}
+
+void playF7Chord() {
+  playFNote(instrument, 120);  
+  playANote(instrument, 120);
+  playCNote(instrument, 120);
+  playEFlatNote(instrument, 120);
+}
+
+void playG7Chord() {
+  playGNote(instrument, 120);
+  playBNote(instrument, 120); 
+  playDNote(instrument, 120); 
+  playFNote(instrument, 120);  
+}
+
+void arbitNoteOff(uint8_t whichNote) { //Defunct don't use we should probably delete it to save memory but I like this :(
   switch (whichNote) {
     case (uint8_t) 1:
       if(noteMode == 1) {
