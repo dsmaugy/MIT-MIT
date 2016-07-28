@@ -75,7 +75,7 @@ SoftwareSerial xbeeSerial(2, 3); // RX, TX
 *                           *
 *                           *
 \***************************/
-int drumSens = 670;
+int drumSens = 700;
 int drumMinimum = 550;
 int valA = 0; //Velostat value
 uint32_t currentLED;

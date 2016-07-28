@@ -20,7 +20,7 @@ byte instrument = 4;
 //70 is cool
 //41 = violin
 
-int noteMode = 1;
+int noteMode = 4;
 //Note Mode 1: C, E, G, B Flat
 //Note Mode 2: F, A, C, E Flat
 //Note Mode 3: Chord Mode
