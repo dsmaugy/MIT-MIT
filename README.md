@@ -1,4 +1,4 @@
-Repository for the MIT (Multimedia Interactive Tiles) project
+Repository for the MIT (Musical Interface Tiles) project
 
 
 
