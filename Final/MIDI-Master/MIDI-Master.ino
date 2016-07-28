@@ -16,10 +16,11 @@ uint8_t data = 0;
 uint8_t option = 0;
 uint8_t lastNotePlayed;
 
-byte instrument = 41;
+byte instrument = 4;
 //70 is cool
+//41 = violin
 
-int noteMode = 4 ;
+int noteMode = 1;
 //Note Mode 1: C, E, G, B Flat
 //Note Mode 2: F, A, C, E Flat
 //Note Mode 3: Chord Mode
@@ -117,6 +118,7 @@ void loop() {
           break;
         } else if (noteMode == 4) {
           playCoolChord1();
+          Serial.println("COOL CHORD 1 PLAYED");
           isPlaying = true;
           break;   
            }
@@ -142,6 +144,7 @@ void loop() {
           break;
         } else if (noteMode == 4) {
           playCoolChord2();
+          Serial.println("COOL CHORD 2 PLAYED");
           isPlaying = true;
           break;   
       }
@@ -167,6 +170,7 @@ void loop() {
           break;
         } else if (noteMode == 4) {
           playCoolChord3();
+          Serial.println("COOL CHORD 3 PLAYED");
           isPlaying = true;
           break;   
       }
@@ -191,6 +195,7 @@ void loop() {
           isPlaying = true;
         } else if (noteMode == 4) {
           playCoolChord4();
+          Serial.println("COOL CHORD 4 PLAYED");
           isPlaying = true;
           break;   
       }
@@ -199,83 +204,88 @@ void loop() {
 
    case (uint8_t) 5:
     if(noteMode == 1) {
-        noteOff(0, 60, 120);
+        offCNote(4, 120);
         isPlaying = false;
       } else if (noteMode == 2) {
-        noteOff(0, 65, 120);
+        offFNote(4, 120);
         isPlaying = false;
-      } else if (noteMode == 3) {
-        noteOff(0, 70, 120);
-        noteOff(0, 62, 120);  
-        noteOff(0, 65, 120);  
-        noteOff(0, 68, 120);  
+      } else if (noteMode == 3) { 
+        offBFlatNote(4, 120);
+        offDNote(4, 120);
+        offFNote(4, 120);
+        offAFlatNote(4, 120);
         isPlaying = false;  
       } else if (noteMode == 4) {
         offDNote(instrument, 120);
         offGFlatNote(instrument, 120);
         offANote(instrument, 120); 
+        isPlaying = false;
        }
     break;
 
    case (uint8_t) 6:
     if(noteMode == 1) {
-        noteOff(0, 64, 120);
+        offENote(4, 120);
         isPlaying = false; 
         isPlaying= false;
       } else if (noteMode == 2) {
-        noteOff(0, 57, 120);
+        offANote(4, 120);
         isPlaying = false;
       } else if (noteMode == 3) {
-        noteOff(0, 60, 120);
-        noteOff(0, 64, 120);
-        noteOff(0, 67, 120);
-        noteOff(0, 70, 120);
+        offCNote(4, 120);
+        offENote(4, 120);
+        offGNote(4, 120);
+        offBFlatNote(4, 120);
         isPlaying = false;
         break;
       } else if (noteMode == 4) {
         offDFlatNote(instrument, 120);
         offENote(instrument, 120);
-        offANote(instrument, 120);             
+        offANote(instrument, 120);  
+        isPlaying = false;           
             }
     break;
 
    case (uint8_t) 7:
     if(noteMode == 1) {
-        noteOff(0, 67, 120);
+        offGNote(4, 120);
         isPlaying = false;
       } else if (noteMode == 2) {
-        noteOff(0, 60, 120);
+        offCNote(4, 120);
         isPlaying = false;
       } else if (noteMode == 3) {
-        noteOff(0, 65, 120);
-        noteOff(0, 57, 120);
-        noteOff(0, 60, 120);
-        noteOff(0, 63, 120);
+        offFNote(4, 120);
+        offANote(4, 120);
+        offCNote(4, 120);
+        offEFlatNote(4, 120);
         isPlaying = false;
       } else if (noteMode == 4) {
         offDNote(instrument, 120);
         offGFlatNote(instrument, 120);
         offBNote(instrument, 120); 
+        isPlaying = false;
           }
     break;
 
    case (uint8_t) 8:
     if(noteMode == 1) {
-        noteOff(0, 70, 120);
+        offBFlatNote(4, 120);
         isPlaying = false;
       } else if (noteMode == 2) {
-        noteOff(0, 63, 120);
+        offEFlatNote(4, 120);
         isPlaying = false;
       } else if (noteMode == 3) {
-        noteOff(0, 67, 120);
-        noteOff(0, 59, 120);
-        noteOff(0, 62, 120);
-        noteOff(0, 65, 120);
+        // G B D F
+        offGNote(4, 120);
+        offBNote(4, 120);
+        offDNote(4, 120);
+        offFNote(4, 120);
         isPlaying = false;         
       } else if (noteMode == 4) {
         offDNote(instrument, 120);
         offGNote(instrument, 120);
         offBNote(instrument, 120); 
+        isPlaying = false;
           }
     break;
   }
@@ -362,7 +372,7 @@ void offBNote(byte instrument, byte noteVelocity) {
 
 void offCFlatNote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
-  noteOff(0, 59);
+  noteOff(0, 59, noteVelocity);
 }
 
 void offCNote(byte instrument, byte noteVelocity) {
@@ -429,7 +439,7 @@ void playBNote(byte instrument, byte noteVelocity) {
 
 void playCFlatNote(byte instrument, byte noteVelocity) {
   talkMIDI(0xC0, instrument, 0x00); //Instrument Change
-  noteOn(0, 59);
+  noteOn(0, 59, noteVelocity);
 }
 
 void playCNote(byte instrument, byte noteVelocity) {
